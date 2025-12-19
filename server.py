@@ -85,17 +85,18 @@ def inject_error(data, error_type=None):
         error_type = random.choice([1, 2, 3, 4, 5, 6, 7])
     
     error_methods = {
-        1: bit_flip,
-        2: character_substitution,
-        3: character_deletion,
-        4: character_insertion,
-        5: character_swapping,
-        6: multiple_bit_flips,
-        7: burst_error
+        1: ("Bit Flip", bit_flip),
+        2: ("Character Substitution", character_substitution),
+        3: ("Character Deletion", character_deletion),
+        4: ("Character Insertion", character_insertion),
+        5: ("Character Swapping", character_swapping),
+        6: ("Multiple Bit Flips", multiple_bit_flips),
+        7: ("Burst Error", burst_error)
     }
     
-    method = error_methods.get(error_type, character_substitution)
-    return method(data)
+    method_name, method_func = error_methods.get(error_type, ("Character Substitution", character_substitution))
+    corrupted = method_func(data)
+    return corrupted, method_name
 
 def handle_client(client_socket, addr):
     try:
@@ -105,30 +106,20 @@ def handle_client(client_socket, addr):
         
         parts = data.split('|')
         if len(parts) != 3:
-            print("="*50)
-            print("Invalid packet format from", addr)
-            print("="*50)
+            print("="*50, flush=True)
+            print("Invalid packet format from", addr, flush=True)
+            print("="*50, flush=True)
             client_socket.close()
             return
         
         original_data, method, control_info = parts
         
-        print("\n" + "="*50)
-        print("Server - Received Packet")
-        print("="*50)
-        print("Original Data        :", original_data)
-        print("Method               :", method)
-        print("Control Info         :", control_info)
-        
         should_corrupt = random.random() < 0.75
         
         if should_corrupt:
-            corrupted_data = inject_error(original_data)
-            print("Corrupted Data       :", corrupted_data)
-            print("Status               : Error injected")
+            corrupted_data, error_method = inject_error(original_data)
         else:
             corrupted_data = original_data
-            print("Status               : Data forwarded without corruption")
         
         packet = f"{corrupted_data}|{method}|{control_info}"
         
@@ -137,22 +128,19 @@ def handle_client(client_socket, addr):
         client2_socket.sendall(packet.encode('utf-8'))
         client2_socket.close()
         
-        print("Packet forwarded to Client 2")
-        print("="*50)
-        
     except Exception as e:
-        print("="*50)
-        print("Error handling client", addr, ":", e)
-        print("="*50)
+        print("="*50, flush=True)
+        print("Error handling client", addr, ":", e, flush=True)
+        print("="*50, flush=True)
     finally:
         client_socket.close()
 
 def main():
-    print("="*50)
-    print("Server - Intermediate Node + Data Corruptor")
-    print("="*50)
-    print("Listening on port 8888 for Client 1...")
-    print("Forwarding to Client 2 on port 9999...\n")
+    print("="*50, flush=True)
+    print("Server - Intermediate Node + Data Corruptor", flush=True)
+    print("="*50, flush=True)
+    print("Listening on port 8888 for Client 1...", flush=True)
+    print("Forwarding to Client 2 on port 9999...\n", flush=True)
     
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -166,7 +154,7 @@ def main():
             thread.daemon = True
             thread.start()
     except KeyboardInterrupt:
-        print("\nServer shutting down...")
+        print("\nServer shutting down...", flush=True)
     finally:
         server_socket.close()
 

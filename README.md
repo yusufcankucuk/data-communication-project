@@ -10,77 +10,73 @@ Bu proje, veri iletişiminde kullanılan hata tespit yöntemlerini gösteren bir
 
 ## Kurulum
 
-Python 3.6 veya üzeri yeterli. Ekstra bir şey kurmanıza gerek yok.
+Python 3.6 veya üzeri yeterli.
 
-## Çalıştırma
+1. Gerekli kütüphaneleri yükleyin (Tkinter genellikle Python ile gelir):
+   ```bash
+   # Gerekirse
+   pip install tk
+   ```
 
-En kolay yol:
+## Çalıştırma (Önerilen)
+
+Projenin grafik arayüzünü (GUI) başlatmak için:
 
 ```bash
-python3 run.py
+python3 gui/main.py
 ```
 
-Bu komut her şeyi otomatik başlatır. İsterseniz manuel olarak da çalıştırabilirsiniz:
+Bu arayüz üzerinden:
+1. **"🚀 Sistemi Başlat"** butonuna basarak Server ve Alıcı'yı otomatik başlatabilirsiniz.
+2. Metin girip yöntem seçerek **"Gönder"** butonuyla veri gönderebilirsiniz.
+3. Tüm sonuçları ve hataları log ekranında görebilirsiniz.
 
-1. Terminal 1: `python3 server.py`
-2. Terminal 2: `python3 client2.py`
-3. Terminal 3: `python3 client1.py`
+## Manuel Çalıştırma (Terminal)
 
-## Kullanım
+İsterseniz bileşenleri terminalden tek tek de çalıştırabilirsiniz (GUI kullanmadan):
 
-Programı çalıştırdığınızda:
+1. Terminal 1 (Sunucu): `python3 server.py`
+2. Terminal 2 (Alıcı): `python3 client2.py`
+3. Terminal 3 (Gönderici): `python3 client1.py`
 
-1. Göndermek istediğiniz metni yazın
-2. Hata tespit yöntemini seçin (1-5 arası)
-3. Sistem otomatik olarak kontrol bilgisini üretir ve gönderir
+## Kullanım Detayları
 
 ### Hata Tespit Yöntemleri
 
 1. **Parity Bit**: Basit parite kontrolü
 2. **2D Parity**: Matris tabanlı parite kontrolü
 3. **CRC**: Döngüsel artıklık kontrolü
-4. **Hamming Code**: Hamming kod ile hata tespiti
+4. **Hamming Code**: Hamming kod ile hata tespiti (ve düzeltme)
 5. **Internet Checksum**: IP checksum algoritması
 
 ### Hata Enjeksiyon Yöntemleri
 
-Sunucu, gelen verilere %75 ihtimalle şu hatalardan birini ekler:
+Sunucu, gelen verilere %75 ihtimalle rastgele bir hata ekler:
+- Bit Flip, Karakter Değiştirme, Silme, Ekleme, Yer Değiştirme, Çoklu Bit Hata, Toplu Hata (Burst)
 
-1. **Bit Flip**: Bir bit ters çevrilir
-2. **Karakter Değiştirme**: Bir karakter başka bir karakterle değiştirilir
-3. **Karakter Silme**: Bir karakter silinir
-4. **Karakter Ekleme**: Rastgele bir karakter eklenir
-5. **Karakter Yer Değiştirme**: İki komşu karakter yer değiştirir
-6. **Çoklu Bit Ters Çevirme**: Birden fazla bit ters çevrilir
-7. **Toplu Hata**: 3-8 karakterlik bir bölüm bozulur
-
-## Örnek Çıktı
-
-Alıcı tarafında şöyle bir çıktı görürsünüz:
+## Örnek Arayüz Çıktısı
 
 ```
 ==================================================
-Client 2 - Received Packet
+Gönderilen Paket:
+Veri                 : MERHABA
+Yöntem               : CRC
+Kontrol Bilgisi      : A1B2
 ==================================================
-Received Data        : HEZLO
-Method               : CRC
-Sent Check Bits      : 87AF
-Computed Check Bits  : 92B1
+Client 2 - Received Packet
 Status               : DATA CORRUPTED
 ==================================================
 ```
 
 ## Dosyalar
 
-- `run.py` - Tüm programı başlatır
-- `client1.py` - Gönderici
-- `server.py` - Sunucu
-- `client2.py` - Alıcı
-- `utils.py` - Hata tespit fonksiyonları
+- `gui/main.py` - Grafik Arayüz (Ana Program)
+- `server.py` - Hata enjekte eden ara sunucu (Port 8888 -> 9999)
+- `client2.py` - Alıcı ve doğrulayıcı (Port 9999)
+- `client1.py` - Manuel gönderici scripti
+- `utils.py` - Algoritma kütüphanesi
 
 ## Önemli Notlar
 
-- Sunucu ve alıcı aynı anda çalışmalı
-- Göndericiyi en son başlatın
-- Sistem localhost üzerinde çalışır (port 8888 ve 9999)
-- Sunucu paketlerin %75'ine hata ekler, %25'i hatasız geçer
+- Sistem **8888** ve **9999** portlarını kullanır.
+- "Port kullanımda" hatası alırsanız bu portları kullanan diğer uygulamaları kapatın (veya eski python process'lerini sonlandırın).
